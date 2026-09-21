@@ -10,7 +10,7 @@ import java.util.List;
 
 public class ChessMoveTests extends EqualsTestingUtility<ChessMove> {
     public ChessMoveTests() {
-        super("ChessMove", "moves");
+        super("ChessMove", "chess/moves");
     }
 
     @Override
