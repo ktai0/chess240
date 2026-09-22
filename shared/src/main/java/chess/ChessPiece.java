@@ -1,6 +1,7 @@
 package chess;
 
 import chess.moves.BishopMoves;
+import chess.moves.KnightMoves;
 import chess.moves.QueenMoves;
 import chess.moves.RookMoves;
 
@@ -71,6 +72,10 @@ public class ChessPiece {
         if (piece.getPieceType() == PieceType.ROOK) {
             RookMoves rookMoves = new RookMoves();
             return rookMoves.calculateMoves(board, myPosition);
+        }
+        if (piece.getPieceType() == PieceType.KNIGHT) {
+            KnightMoves knightMoves = new KnightMoves();
+            return knightMoves.calculateMoves(board, myPosition);
         }
         return List.of();
     }
