@@ -1,5 +1,7 @@
 package chess;
 
+import chess.moves.BishopMoves;
+
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
@@ -57,7 +59,8 @@ public class ChessPiece {
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
         ChessPiece piece= board.getPiece(myPosition);
         if (piece.getPieceType() == PieceType.BISHOP) {
-
+            BishopMoves bishopMoves = new BishopMoves();
+            return bishopMoves.calculateMoves(board, myPosition);
         }
         return List.of();
     }
