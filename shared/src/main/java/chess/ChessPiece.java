@@ -78,6 +78,10 @@ public class ChessPiece {
             KingMoves kingMoves = new KingMoves();
             return kingMoves.calculateMoves(board, myPosition);
         }
+        if (piece.getPieceType() == PieceType.PAWN) {
+            PawnMoves pawnMoves = new PawnMoves();
+            return pawnMoves.calculateMoves(board, myPosition);
+        }
         return List.of();
     }
 
