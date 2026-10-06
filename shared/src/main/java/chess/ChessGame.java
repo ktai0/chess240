@@ -10,19 +10,19 @@ import java.util.Collection;
  */
 public class ChessGame {
 
-    private final Chessboard board;
-    private final TeamColor teamTurn;
+    private ChessBoard board;
+    private TeamColor currentTurn;
 
     public ChessGame() {
         this.board = new ChessBoard();
-        this.teamTurn = TeamColor.WHITE;
+        this.currentTurn = TeamColor.WHITE;
     }
 
     /**
      * @return Which team's turn it is
      */
     public TeamColor getTeamTurn() {
-        return teamTurn;
+        return currentTurn;
     }
 
     /**
@@ -31,7 +31,7 @@ public class ChessGame {
      * @param team the team whose turn it is
      */
     public void setTeamTurn(TeamColor team) {
-        this.teamTurn = team;
+        currentTurn = team;
     }
 
     /**
@@ -70,7 +70,38 @@ public class ChessGame {
      * @return True if the specified team is in check
      */
     public boolean isInCheck(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        ChessPosition kingPos = null;
+
+        //find the king
+        for (int row = 1; row <= 8; row ++){
+            for (int col = 1; col <=8; col++){
+                ChessPosition pos = new ChessPosition (row, col);
+                ChessPiece piece_at_pos = board.getPiece(pos);
+                if (piece_at_pos != null && piece_at_pos.getTeamColor() == teamColor && piece_at_pos.getPieceType() == ChessPiece.PieceType.KING){
+                    kingPos = pos;
+                }
+            }
+        }
+
+        //check if any enemy piece can reach the king
+            //iterate through the board to find all enemy pieces
+        for (int row =1; row <= 8; row ++){
+            for (int col = 1; col <=8; col++){
+                ChessPosition pos = new ChessPosition (row, col);
+                ChessPiece piece_at_pos = board.getPiece(pos);
+                if (piece_at_pos != null && piece_at_pos.getTeamColor() != teamColor){
+                    //get all the moves for that enemy piece
+                    Collection<ChessMove> moves = piece_at_pos.pieceMoves (board, pos);
+                    for (ChessMove move: moves){
+                        //check if the end point hits the king
+                        if (move.getEndPosition().equals(kingPos)){
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     /**
@@ -112,3 +143,4 @@ public class ChessGame {
         return board;
     }
 }
+
