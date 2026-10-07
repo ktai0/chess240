@@ -85,6 +85,42 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
+        //Invalid Move Exception if
+        // it's not that teams turn
+        // it is trying to move outside of their allowed moves
+        // there is no piece at the starting position
+        ChessPosition start = move.getStartPosition();
+        ChessPosition end = move.getEndPosition();
+        ChessPiece.PieceType promoPiece = move.getPromotionPiece();
+        ChessPiece currentPiece = board.getPiece(start);
+
+        if (currentPiece == null){
+            throw new InvalidMoveException("No piece at square");
+        } else if (currentPiece.getTeamColor() != currentTurn){
+            throw new InvalidMoveException("Other team's turn");
+        }
+
+        Collection<ChessMove> legalMoves = validMoves(start);
+        if (!legalMoves.contains(move)){
+            throw new InvalidMoveException("Not a legal move");
+        }
+        // move piece of board
+        // get starting position and then move the piece to the end position
+        // edge cases : upgrade
+        //switch to the other team
+
+        if (move.getPromotionPiece() != null){
+            board.addPiece(end, new ChessPiece(currentTurn, move.getPromotionPiece()));
+        }else{
+            board.addPiece(end, currentPiece);
+        }
+        board.addPiece(start, null);
+
+        if (currentTurn == TeamColor.WHITE){
+            currentTurn = TeamColor.BLACK;
+        } else {
+            currentTurn = TeamColor.WHITE;
+        }
 
     }
 
