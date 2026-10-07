@@ -2,6 +2,7 @@ package chess;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Objects;
 
 /**
  * A class that can manage a chess game, making moves on a board
@@ -16,6 +17,7 @@ public class ChessGame {
 
     public ChessGame() {
         this.board = new ChessBoard();
+        this.board.resetBoard();
         this.currentTurn = TeamColor.WHITE;
     }
 
@@ -173,7 +175,7 @@ public class ChessGame {
      */
     public boolean isInCheckmate(TeamColor teamColor) {
         // has no valid moves (no other pieces can block) and the king is in check
-        return isInCheck(teamColor) && !noValidMoves(teamColor);
+        return isInCheck(teamColor) && noValidMoves(teamColor);
     }
 
     /**
@@ -185,7 +187,7 @@ public class ChessGame {
      */
     public boolean isInStalemate(TeamColor teamColor) {
         // the king is not in check, but there are no valid moves
-        return !isInCheck(teamColor) && !noValidMoves();
+        return !isInCheck(teamColor) && noValidMoves(teamColor);
     }
 
     /**
@@ -217,8 +219,22 @@ public class ChessGame {
                     }
                 }
             }
-            return true;
         }
+        return true;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        ChessGame chessGame = (ChessGame) o;
+        return Objects.equals(board, chessGame.board) && currentTurn == chessGame.currentTurn;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(board, currentTurn);
     }
 }
 
