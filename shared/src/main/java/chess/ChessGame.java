@@ -14,6 +14,14 @@ public class ChessGame {
 
     private ChessBoard board;
     private TeamColor currentTurn;
+    private boolean whiteKingMoved = false;
+    private boolean blackKingMoved = false;
+    private boolean whiteRook1Moved = false;
+    private boolean whiteRook2Moved = false;
+    private boolean blackRook1Moved = false;
+    private boolean blackRook2Moved = false;
+    private ChessMove lastMove = null;
+
 
     public ChessGame() {
         this.board = new ChessBoard();
@@ -77,6 +85,11 @@ public class ChessGame {
             board.addPiece(move.getStartPosition(), piece);
             board.addPiece(move.getEndPosition(), target);
         }
+
+        if (piece.getPieceType() == ChessPiece.PieceType.KING) {
+            castlingMoves(startPosition, piece.getTeamColor(), legalMoves);
+        }
+
         return legalMoves;
     }
 
@@ -111,6 +124,14 @@ public class ChessGame {
         // edge cases : upgrade
         //switch to the other team
 
+        updateTracking(start, currentPiece);
+        int dif = end.getColumn() - start.getColumn();
+        if (currentPiece.getPieceType() == ChessPiece.PieceType.KING){
+            if (dif ==2 || dif == -2) {
+                doCastling(move);
+            }
+        }
+
         if (move.getPromotionPiece() != null){
             board.addPiece(end, new ChessPiece(currentTurn, move.getPromotionPiece()));
         }else{
@@ -123,7 +144,6 @@ public class ChessGame {
         } else {
             currentTurn = TeamColor.WHITE;
         }
-
     }
 
     /**
@@ -197,6 +217,13 @@ public class ChessGame {
      */
     public void setBoard(ChessBoard board) {
         this.board = board;
+        whiteKingMoved = false;
+        blackKingMoved = false;
+        whiteRook1Moved = false;
+        whiteRook2Moved = false;
+        blackRook1Moved = false;
+        blackRook2Moved = false;
+        lastMove = null;
     }
 
     /**
@@ -221,6 +248,165 @@ public class ChessGame {
             }
         }
         return true;
+    }
+
+    //Extra Credit
+    //Castling
+    private void castlingMoves(ChessPosition kingPos, ChessGame.TeamColor teamColor, Collection<ChessMove> moves){
+        // check if king has moved
+        if (teamColor == TeamColor.WHITE && whiteKingMoved) {
+            return;
+        }
+        if (teamColor == TeamColor.BLACK && blackKingMoved){
+            return;
+        }
+
+        //check if king is in check
+        if (isInCheck(teamColor)){
+            return;
+        }
+
+        // check if kingside rook (column 8) has moved
+        int kingRow = kingPos.getRow();
+        boolean rightSideRookMoved = false;
+        if (teamColor == TeamColor.WHITE){
+            rightSideRookMoved = whiteRook2Moved;
+        }else {
+            rightSideRookMoved = blackRook2Moved;
+        }
+
+        if (!rightSideRookMoved){
+            ChessPosition rookPos = new ChessPosition(kingRow,8);
+            ChessPiece rook = board.getPiece(rookPos);
+
+            if (rook != null && rook.getPieceType() == ChessPiece.PieceType.ROOK
+                    && rook.getTeamColor() == teamColor){
+                //check between king and rook
+                ChessPosition square6 = new ChessPosition(kingRow, 6);
+                ChessPosition square7 = new ChessPosition(kingRow, 7);
+
+                if (board.getPiece(square6) == null && board.getPiece(square7) == null){
+                    boolean square6Clear = !isSquareAttacked(square6, teamColor);
+                    boolean square7Clear = !isSquareAttacked(square7, teamColor);
+
+                    if (square6Clear && square7Clear){
+                        ChessMove castleMove = new ChessMove(kingPos, square7, null);
+                        moves.add(castleMove);
+                    }
+                }
+            }
+        }
+
+        // otherside
+        boolean leftSideRookMoved = false;
+        if (teamColor == TeamColor.WHITE){
+            leftSideRookMoved = whiteRook1Moved;
+        }else {
+            leftSideRookMoved = blackRook1Moved;
+        }
+
+        if (!leftSideRookMoved){
+            ChessPosition rookPos = new ChessPosition(kingRow,1);
+            ChessPiece rook = board.getPiece(rookPos);
+
+            if (rook != null && rook.getPieceType() == ChessPiece.PieceType.ROOK
+                    && rook.getTeamColor() == teamColor){
+                //check between king and rook
+                ChessPosition square2 = new ChessPosition(kingRow, 2);
+                ChessPosition square3 = new ChessPosition(kingRow, 3);
+                ChessPosition square4 = new ChessPosition(kingRow, 4);
+
+                if (board.getPiece(square2) == null && board.getPiece(square3) == null
+                        && board.getPiece(square4) == null){
+                    boolean square2Clear = !isSquareAttacked(square2, teamColor);
+                    boolean square3Clear = !isSquareAttacked(square3, teamColor);
+                    boolean square4Clear = !isSquareAttacked(square4, teamColor);
+
+                    if (square2Clear && square3Clear && square4Clear){
+                        ChessMove castleMove = new ChessMove(kingPos, square3, null);
+                        moves.add(castleMove);
+                    }
+                }
+            }
+        }
+    }
+
+    private boolean isSquareAttacked(ChessPosition square, ChessGame.TeamColor teamColor) {
+        // loop through squares on board
+        for (int row = 1; row <= 8; row++) {
+            for (int col = 1; col <= 8; col++) {
+                ChessPosition pos = new ChessPosition(row, col);
+                ChessPiece piece = board.getPiece(pos);
+
+                // skip empty squares
+                if (piece == null) {
+                    continue;
+                }
+                if (piece.getTeamColor() == teamColor) {
+                    continue;
+                }
+
+                // check enemy pieces
+                Collection<ChessMove> enemyMoves = piece.pieceMoves(board, pos);
+                for (ChessMove move : enemyMoves) {
+                    if (move.getEndPosition().equals(square)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    private void doCastling(ChessMove move) {
+        int startRow = move.getStartPosition().getRow();
+        int kingEndCol = move.getEndPosition().getColumn();
+
+        if (kingEndCol == 7) {
+            // move rook from column 8 to column 6
+            ChessPosition oldRookPos = new ChessPosition(startRow, 8);
+            ChessPosition newRookPos = new ChessPosition(startRow, 6);
+            ChessPiece rook = board.getPiece(oldRookPos);
+            board.addPiece(newRookPos, rook);
+            board.addPiece(oldRookPos, null);
+        }
+
+        //other side
+        if (kingEndCol == 3) {
+            // move rook from column 1 to column 4
+            ChessPosition oldRookPos = new ChessPosition(startRow, 1);
+            ChessPosition newRookPos = new ChessPosition(startRow, 4);
+            ChessPiece rook = board.getPiece(oldRookPos);
+            board.addPiece(newRookPos, rook);
+            board.addPiece(oldRookPos, null);
+        }
+    }
+    private void updateTracking(ChessPosition start, ChessPiece piece) {
+        // if king moved
+        if (piece.getPieceType() == ChessPiece.PieceType.KING) {
+            if (piece.getTeamColor() == TeamColor.WHITE) {
+                whiteKingMoved = true;
+            } else {
+                blackKingMoved = true;
+            }
+        }
+
+        // if rook moved
+        if (piece.getPieceType() == ChessPiece.PieceType.ROOK) {
+            //whiteRook
+            if (start.getRow() == 1 && start.getColumn() == 1) {
+                whiteRook1Moved = true;
+            }
+            if (start.getRow() == 1 && start.getColumn() == 8) {
+                whiteRook2Moved = true;
+            }
+            if (start.getRow() == 8 && start.getColumn() == 1) {
+                blackRook1Moved = true;
+            }
+            if (start.getRow() == 8 && start.getColumn() == 8) {
+                blackRook2Moved = true;
+            }
+        }
     }
 
     @Override

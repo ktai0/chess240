@@ -81,6 +81,5 @@ public class ChessBoard {
             addPiece(new ChessPosition(7,col), new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.PAWN));
         }
 
-
     }
 }
