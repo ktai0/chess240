@@ -1,4 +1,4 @@
-package server.server;
+package server;
 
 import io.javalin.*;
 
