@@ -10,16 +10,15 @@ public class ClearService {
     private final GameDAO gameDAO;
     private final AuthDAO authDAO;
 
-    public ClearService(UserDAO userDAO, GameDAO gameDAO, AuthDAO authDAO){
+    public ClearService(UserDAO userDAO, GameDAO gameDAO, AuthDAO authDAO) {
         this.userDAO = userDAO;
         this.authDAO = authDAO;
         this.gameDAO = gameDAO;
     }
 
-    public void clear() throws DataAccessException{
+    public void clear() throws DataAccessException {
         userDAO.clear();
         authDAO.clear();
         gameDAO.clear();
     }
-
 }

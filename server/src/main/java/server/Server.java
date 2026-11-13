@@ -3,6 +3,7 @@ package server;
 import io.javalin.*;
 import com.google.gson.Gson;
 import server.handler.ClearHandler;
+import server.handler.UserHandler;
 import server.service.ClearService;
 import dataaccess.AuthDAO;
 import dataaccess.GameDAO;
@@ -11,6 +12,8 @@ import dataaccess.DataAccessException;
 import dataaccess.InMemoryAuthDAO;
 import dataaccess.InMemoryGameDAO;
 import dataaccess.InMemoryUserDAO;
+import server.service.UserService;
+
 import java.util.Map;
 
 
@@ -28,7 +31,12 @@ public class Server {
         ClearService clearService = new ClearService(userDAO,gameDAO, authDAO);
         ClearHandler clearHandler = new ClearHandler(clearService);
 
+        UserService userService = new UserService(userDAO);
+        UserHandler userHandler = new UserHandler(userService);
+
+
         javalin.delete("/db", clearHandler::clear);
+        javalin.post("/user", userHandler::register);
 
         javalin.exception(DataAccessException.class, (e, ctx) -> {
             ctx.status(500);
