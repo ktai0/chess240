@@ -12,4 +12,14 @@ public class InMemoryUserDAO implements UserDAO {
     public void clear() {
         users.clear();
     }
+
+    @Override
+    public UserData getUser(String username){
+        return users.get(username);
+    }
+
+    @Override
+    public void createUser(UserData userData){
+        users.put(userData.username(), userData);
+    }
 }

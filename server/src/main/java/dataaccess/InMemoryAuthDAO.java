@@ -12,4 +12,9 @@ public class InMemoryAuthDAO implements AuthDAO {
     public void clear() {
         auth.clear();
     }
+
+    @Override
+    public void createAuth(AuthData authData){
+        auth.put(authData.authToken(), authData);
+    }
 }
