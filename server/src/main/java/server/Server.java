@@ -31,7 +31,7 @@ public class Server {
         ClearService clearService = new ClearService(userDAO,gameDAO, authDAO);
         ClearHandler clearHandler = new ClearHandler(clearService);
 
-        UserService userService = new UserService(userDAO);
+        UserService userService = new UserService(userDAO, gameDAO, authDAO);
         UserHandler userHandler = new UserHandler(userService);
 
 
