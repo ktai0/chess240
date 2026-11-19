@@ -297,7 +297,7 @@ public class ChessGame {
             }
         }
 
-        // otherside
+        //otherside
         boolean leftSideRookMoved = false;
         if (teamColor == TeamColor.WHITE){
             leftSideRookMoved = whiteRook1Moved;
